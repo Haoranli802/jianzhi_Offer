@@ -294,7 +294,7 @@ public class Solution {
 
 JZ43整数中1出现的次数
 
-import java.util.*;
+```
 public class Solution {
     public int NumberOf1Between1AndN_Solution(int n) {
         int res = 0;
