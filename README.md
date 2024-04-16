@@ -219,3 +219,267 @@ public class Solution {
 }
 //O(NlogN), O(N)
 ```
+
+***
+
+JZ61扑克牌顺子
+
+1.用set来解决，把数组中的数字推入栈，记录最大最小值，如果数字是0则不推入栈，如果遇到已经入栈的数字那么直接返回false。最后判断最大减最小值是否小于5即可。
+
+O(N), O(N)
+
+2.我们可以先将数组排序，然后将遍历数组记录大小王数量 ，重复则返回 false ，遍历结束取最大值和最小值进行比较 小于5即是顺子，
+
+O(NlogN), O(logN)
+
+***
+
+JZ20表示数值的字符串
+
+```
+import java.util.*;
+public class Solution {
+    //遍历字符串的下标
+    private int index = 0;
+    //有符号判断
+    private boolean integer(String s){
+        if(index < s.length() && (s.charAt(index) == '-' || s.charAt(index) == '+'))
+            index++;
+        return unsigned_integer(s);
+    }
+    //无符号数判断
+    private boolean unsigned_integer(String s){
+        int temp = index;
+        while(index < s.length() && (s.charAt(index) >= '0' && s.charAt(index) <= '9'))
+            index++;
+        return index > temp;
+    }
+    public boolean isNumeric (String str) {
+        //先判断空串
+        if(str == null || str.length() == 0)
+            return false;
+        //去除前面的空格
+        while(index < str.length() && str.charAt(index) == ' ')
+            index++;
+        int n = str.length() - 1;
+        //去除字符串后面的空格
+        while(n >= 0 && str.charAt(n) == ' ')
+            n--;
+        //限制的长度比下标1
+        n++;
+        //全是空格情况
+        if(n < index)
+            return false;
+        //判断前面的字符是否是有符号的整数
+        boolean flag = integer(str);
+        //如果有小数点
+        if(index < n && str.charAt(index) == '.'){
+            index++;
+            //小数点前后有无数字可选
+            flag = unsigned_integer(str) || flag; 
+        }
+        //如果有e
+        if(index < n && (str.charAt(index) == 'e' || str.charAt(index) == 'E')){
+            index++;
+            //e后面必须全是整数
+            flag = flag && integer(str);
+        }
+        //是否字符串遍历结束
+        return flag && (index == n);
+    }
+}
+
+//O(N), O(1)
+```
+
+JZ43整数中1出现的次数
+
+import java.util.*;
+public class Solution {
+    public int NumberOf1Between1AndN_Solution(int n) {
+        int res = 0;
+        //遍历1-n
+        for(int i = 1; i <= n; i++){ 
+            //遍历每个数的每一位
+            for(int j = i; j > 0; j = j / 10){ 
+                //遇到数字1计数
+                if(j % 10 == 1) 
+                    res++;
+            }
+        }
+        return res;
+    }
+}
+//O(Nlog10N), O(1)
+```
+
+
+***
+
+JZ45把数组排成最小的数
+
+```
+import java.util.*;
+public class Solution {
+    public String PrintMinNumber(int [] numbers) {
+        //空数组的情况
+        if(numbers == null || numbers.length == 0)
+            return "";
+        String[] nums = new String[numbers.length];
+        //将数字转成字符
+        for(int i = 0; i < numbers.length; i++)
+            nums[i] = numbers[i] + "";
+        //按照重载排序
+        Arrays.sort(nums, new Comparator<String>() {
+            public int compare(String s1, String s2) {
+                return (s1 + s2).compareTo(s2 + s1);
+            }
+        });
+        StringBuilder res = new StringBuilder();
+        //字符串叠加
+        for(int i = 0; i < nums.length; i++)
+            res.append(nums[i]);
+        return res.toString();
+    }
+}
+//O(NlogN), O(N)
+```
+
+***
+
+JZ49找丑数
+
+```
+import java.util.*;
+public class Solution {
+    public int GetUglyNumber_Solution(int index) {
+        //排除0
+        if(index == 0)
+            return 0; 
+        //要乘的因数
+        int[] factors = {2, 3, 5}; 
+        //去重
+        HashMap<Long, Integer> mp = new HashMap<>();
+        //小顶堆
+        PriorityQueue<Long> pq = new PriorityQueue<>(); 
+        //1先进去
+        mp.put(1L, 1);
+        pq.offer(1L);
+        long res = 0;
+        for(int i = 0; i < index; i++){ 
+            //每次取最小的
+            res = pq.poll(); 
+            for(int j = 0; j < 3; j++){
+                //乘上因数
+                long next = (long)res * factors[j]; 
+                //只取未出现过的
+                if(!mp.containsKey(next)){  
+                    mp.put(next, 1);
+                    pq.offer(next);
+                }
+            }
+        }
+        return (int)res;
+    }
+}
+
+//O(NlogN), O(N)
+
+
+import java.util.*;
+public class Solution {
+    //寻找三个数中的最小值
+    private int findMin(int x, int y, int z){  
+        int res = x; 
+        res = y < res ? y : res;
+        res = z < res ? z : res;
+        return res;
+    }
+    public int GetUglyNumber_Solution(int index) {
+        //排除0
+        if(index == 0)
+            return 0; 
+        //按顺序记录丑数
+        ArrayList<Integer> num = new ArrayList<>(); 
+        num.add(1);
+        //记录这是第几个丑数
+        int count = 1; 
+        //分别代表要乘上2 3 5的下标
+        int i = 0, j = 0, k = 0; 
+        while(count < index){
+            //找到三个数中最小的丑数
+            num.add(findMin(num.get(i) * 2, num.get(j) * 3, num.get(k) * 5)); 
+            count++;
+            //由2与已知丑数相乘得到的丑数，那该下标及之前的在2这里都用不上了
+            if(num.get(count - 1) == num.get(i) * 2)
+                i++; 
+            //由3与已知丑数相乘得到的丑数，那该下标及之前的在3这里都用不上了
+            if(num.get(count - 1) == num.get(j) * 3)
+                j++; 
+            //由5与已知丑数相乘得到的丑数，那该下标及之前的在5这里都用不上了
+            if(num.get(count - 1) == num.get(k) * 5)
+                k++; 
+        }
+        return num.get(count - 1);
+    }
+}
+//O(N), O(N)
+```
+
+***
+
+JZ74和为S的正整数序列
+
+```
+import java.util.*;
+public class Solution {
+    public ArrayList<ArrayList<Integer> > FindContinuousSequence(int sum) {
+        ArrayList<ArrayList<Integer> > res = new ArrayList<ArrayList<Integer> >();
+        //从1到2的区间开始
+        for(int l = 1, r = 2; l < r;){ 
+            //计算区间内的连续和
+            int sum1 = (l + r) * (r - l + 1) / 2; 
+            //如果区间内和等于目标数
+            if(sum1 == sum){ 
+                ArrayList<Integer> temp = new ArrayList<Integer>();
+                //记录区间序列
+                for(int i = l; i <= r; i++) 
+                    temp.add(i);
+                res.add(temp);
+                //左区间向右
+                l++; 
+            //如果区间内的序列和小于目标数，右区间扩展
+            }else if(sum1 < sum) 
+                r++;
+            //如果区间内的序列和大于目标数，左区间收缩
+            else 
+                l++;
+        }
+        return res;
+    }
+}
+//滑动指针O(N), O(sqrt(N))
+```
+
+***
+
+JZ62圆圈中最后剩下的数字
+
+```
+public class Solution {
+    private int function(int n, int m) {
+        if (n == 1)  
+            return 0;
+        //递归
+        int x = function(n - 1, m);
+        //返回最后删除的那个元素
+        return (m + x) % n;  
+    }
+    public int LastRemaining_Solution(int n, int m) {
+        //没有小朋友的情况
+        if(n == 0 || m == 0) 
+            return -1;
+        return function(n, m);
+    }
+}
+```
